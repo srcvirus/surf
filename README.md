@@ -1,2 +1,2 @@
 # surf
-File system interface for managing DigitalOcean droplets
+File system interface for surfing through DigitalOcean droplets
