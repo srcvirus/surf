@@ -7,9 +7,11 @@ from fuse import FUSE, FuseOSError, Operations, fuse_get_context
 
 INF = 999999
 
+
 class SurfFS(Operations):
+
     def __init__(self, personal_token, mount_point, storage):
-        self._ocean_channel = digitalocean.Manager(token = personal_token)
+        self._ocean_channel = digitalocean.Manager(token=personal_token)
         self._mount_point = mount_point
         self._storage = storage
         self._droplets = self._ocean_channel.get_all_droplets()
@@ -35,22 +37,24 @@ class SurfFS(Operations):
     ------<file for droplet parameters>
     --/images
     """
+
     def _initialize_directory_structure(self):
         droplet_dir = self._storage_path(self._DROPLET_)
         image_dir = self._storage_path(self._IMAGE_)
         if not os.path.exists(droplet_dir):
-            os.mkdir(self._storage_path(self._DROPLET_), 0755)
+            os.mkdir(self._storage_path(self._DROPLET_), 0o755)
         for droplet in self._droplets:
             d_inst_dir = "/".join([self._DROPLET_, droplet.name])
             if not os.path.exists(self._mount_point + d_inst_dir):
-                os.mkdir(self._storage_path(d_inst_dir), 0755)
+                os.mkdir(self._storage_path(d_inst_dir), 0o755)
         if not os.path.exists(image_dir):
-            os.mkdir(self._storage_path(self._IMAGE_), 0755)
+            os.mkdir(self._storage_path(self._IMAGE_), 0o755)
 
     """
     Overriden Filesystem methods
     ============================
     """
+
     def access(self, path, mode):
         path = self._storage_path(path)
         if not os.access(path, mode):
@@ -63,12 +67,16 @@ class SurfFS(Operations):
     def chown(self, path, uid, gid):
         path = self._storage_path(path)
         return os.chown(path, uid, gid)
-    
+
     def getattr(self, path, fh=None):
         path = self._storage_path(path)
         stats = os.lstat(path)
-        return dict((key, getattr(stats, key)) for key in [attr for attr in
-            dir(stats) if attr.startswith('st_')])
+        return dict(
+            (key,
+             getattr(
+                 stats,
+                 key)) for key in [
+                attr for attr in dir(stats) if attr.startswith('st_')])
 
     def readdir(self, path, fh):
         path = self._storage_path(path)
@@ -90,15 +98,18 @@ class SurfFS(Operations):
     def statfs(self, path):
         path = self._storage_path(path)
         vfs_stats = os.statvfs(path)
-        return dict((key, getattr(vfs_stats, key)) for key in [attr for attr in
-            dir(vfs_stats) if attr.startswith('f_')])
+        return dict(
+            (key,
+             getattr(
+                 vfs_stats,
+                 key)) for key in [
+                attr for attr in dir(vfs_stats) if attr.startswith('f_')])
 
-    
     def open(self, path, flags):
         return os.open(self._storage_path(path), flags)
 
     def create(self, path, mode, fi=None):
-        return os.open(self._storage_path(path), 
+        return os.open(self._storage_path(path),
                        os.O_WRONLY | os.O_CREAT, mode)
 
     def read(self, path, length, offset, fh):
@@ -111,5 +122,3 @@ class SurfFS(Operations):
 
     def flush(self, path, fh):
         return os.fsync(fh)
-
-
