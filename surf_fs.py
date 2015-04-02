@@ -42,13 +42,14 @@ class SurfFS(Operations):
         droplet_dir = self._storage_path(self._DROPLET_)
         image_dir = self._storage_path(self._IMAGE_)
         if not os.path.exists(droplet_dir):
-            os.mkdir(self._storage_path(self._DROPLET_), 0o755)
+            os.mkdir(droplet_dir, 0o755)
         for droplet in self._droplets:
-            d_inst_dir = "/".join([self._DROPLET_, droplet.name])
-            if not os.path.exists(self._mount_point + d_inst_dir):
-                os.mkdir(self._storage_path(d_inst_dir), 0o755)
+            d_inst_dir = self._storage_path("/".join([self._DROPLET_,
+                                                      droplet.name]))
+            if not os.path.exists(d_inst_dir):
+                os.mkdir(d_inst_dir, 0o755)
         if not os.path.exists(image_dir):
-            os.mkdir(self._storage_path(self._IMAGE_), 0o755)
+            os.mkdir(image_dir, 0o755)
 
     """
     Overriden Filesystem methods
